@@ -2,7 +2,6 @@
   "name": "revocable-self-signed-tls-certificates-hack",
   "version": "0.0.0",
   "description": "Revocable, Self-Signed TLS Certificates",
-  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -23,6 +22,8 @@
   "homepage": "https://github.com/ChristopherA/revocable-self-signed-tls-certificates-hack",
   "dependencies": {
     "bitcore": "^0.12.4",
+    "bitcore-explorers": "^0.11.0",
+    "lightsaber": "^0.4.1",
     "node-forge": "^0.6.26",
     "shelljs": "^0.4.0"
   }
