@@ -156,7 +156,7 @@ However, I believe that the general approach offers some strong ideas for the fu
 Demo
 ----
 
-These are the details for the demo of this capability for Blockchain University’s Demo Night on Saturday May 16th: http://www.meetup.com/blockchainU/events/221953311/
+These are the details for the demo of this capability for Blockchain University’s Demo Night on Monday May 18th: http://www.meetup.com/blockchainU/events/221953311/
 
 We are using the bitcore.js library for node and browser-based bitcoin transactions, with some code from other open source libraries offline paper wallet, and javascript-based TLS and certificates.
 
