@@ -171,12 +171,12 @@ Example Usage
 
     npm install
 
-    ./create.coffee
+    npm run create
 
 
 Go [put 500000 Satoshis](https://accounts.blockcypher.com/testnet-faucet) on the returned BTC address
 
-    ./verify.coffee
+    npm run verify
 
 Should be pending, for a while, then true, once the trancaction clears.
 

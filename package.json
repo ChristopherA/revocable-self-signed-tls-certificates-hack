@@ -6,6 +6,10 @@
     "type": "git",
     "url": "https://github.com/ChristopherA/revocable-self-signed-tls-certificates-hack.git"
   },
+  "scripts": {
+    "create": "coffee create.coffee",
+    "verify": "coffee verify.coffee"
+  },
   "keywords": [
     "tls",
     "bitcoin",
