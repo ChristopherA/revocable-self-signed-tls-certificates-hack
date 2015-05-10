@@ -169,14 +169,36 @@ We install the self-signed certificate in a node TLS web server. We then demonst
 Example Usage
 -------------
 
+    npm install -g coffee-script
+
     npm install
 
     npm run create
+    
+This creates a new RSA key pair, a new testnet bitcoin address, and a self-signed certificate with the bitcoin address embedded in it.
 
+    openssl x509 -noout -text -in tmp/certs/www.mydomain.com.cert
+    
+This demonstrates that the self-signed certificate is valid, and that the testnet bitcoin address is listed in the Organizational Unit field.
+    
+    npm run verify
 
-Go [put 500000 Satoshis](https://accounts.blockcypher.com/testnet-faucet) on the returned BTC address
+The result should be "awaiting claim" as there are no transactions associated with the new address.
+
+Use a testnet bitcoin faucet to [put 500000 Satoshis](https://accounts.blockcypher.com/testnet-faucet) on the self-signed certificate's bitcoin address.
 
     npm run verify
 
-Should be pending, for a while, then true, once the trancaction clears.
+The result will pending ("awaiting network confirmation") for up to 10 minutes, then will return true "claim maintained" once the transaction clears.
 
+If there are any outgoing transactions on the bitcoin address, the result will be "claim revoked".
+
+To Be Done
+----------
+* `npm run create-temporary-wallet` should create a temporary bitcoin account that we will fill from a testnet faucet. 
+* `npm run create-ssc` should sha256 hash from the self-signed certificates signature and then transfer from the temporary wallet's bitcoin address to the certificate's bitcoin address with an OP_RETURN of the signature hash.
+* `npm run verify-ssc` should first verify the self-signed certificate's signature,  confirm the embedded bitcoin address (as it does above), then retrieve the first transaction on that address to confirm that the signature hash matches.
+* `npm run revoke-ssc` should zero the balance of the certificate's address, returning it to the temporary wallet account along with an OP_RETURN with the reason for revocation.
+* `npm run paper-revoke-ssc` should create a paper version of the certificate, with QR-codes demonstrating that you can store the revocation keys offline and revoke the certificate using standard mobile wallet software.
+
+Future demos can install the self-signed certificate into an node server, then connect to it a node client using a modified version of TLS Forge to demonstrate validation and revocation use within TLS.
