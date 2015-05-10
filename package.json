@@ -20,6 +20,7 @@
   "dependencies": {
     "bitcore": "^0.12.4",
     "bitcore-explorers": "^0.11.0",
+    "coffee-script": "^1.9.2",
     "lightsaber": "^0.4.1",
     "node-forge": "^0.6.26",
     "shelljs": "^0.4.0"
