@@ -1,5 +1,8 @@
+#!/usr/bin/env coffee
+
 lightsaber = require('lightsaber')
 log = lightsaber.log
+require 'shelljs/global'
 bitcore = require('bitcore')
 Insight = require('bitcore-explorers').Insight
 
@@ -22,9 +25,22 @@ checkTruth = (error, info) ->
       log "---> claim revoked"
 
 address = 'mtPzC1nxwaMk4gbXdrzTQPVchYJQoZWzjB'
-insight = new Insight('https://test-insight.bitpay.com', bitcore.Networks.testnet)
-insight.address address, checkTruth
+# insight = new Insight('https://test-insight.bitpay.com', bitcore.Networks.testnet)
+# insight.address address, checkTruth
 
 
 # extract bitcoin address
+
+getAddressFromCert = (cert)->
+  certText = exec "openssl x509 -noout -text -in #{cert}"
+  log '---------'
+  # Subject: C=NO, ST=None, L=Aethers, O=OrgName, OU=n3kTRVniUF4zSx744JthxGh4qxnNYRnJqi, CN=www.mydomain.com
+  m = certText.output.match /\n\s+Subject:.*OU=(\w+), /
+  m[1]
+
+address = getAddressFromCert "tmp/certs/www.mydomain.com.cert"
+
+log address
+
+
 # look at that address' transaction's op return -- see that it matches
