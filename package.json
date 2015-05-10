@@ -1,0 +1,29 @@
+{
+  "name": "revocable-self-signed-tls-certificates-hack",
+  "version": "0.0.0",
+  "description": "Revocable, Self-Signed TLS Certificates",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ChristopherA/revocable-self-signed-tls-certificates-hack.git"
+  },
+  "keywords": [
+    "tls",
+    "bitcoin",
+    "proof"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ChristopherA/revocable-self-signed-tls-certificates-hack/issues"
+  },
+  "homepage": "https://github.com/ChristopherA/revocable-self-signed-tls-certificates-hack",
+  "dependencies": {
+    "bitcore": "^0.12.4",
+    "node-forge": "^0.6.26",
+    "shelljs": "^0.4.0"
+  }
+}
