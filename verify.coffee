@@ -16,7 +16,7 @@ checkTruth = (error, info) ->
   else
     log info
     { balance, totalReceived, totalSent } = info
-    if balance is totalReceived and totalSent is 0
+    if balance > 0 and totalSent is 0
       log "---> claim maintained"
     else
       log "---> claim revoked"
