@@ -2,9 +2,6 @@
   "name": "revocable-self-signed-tls-certificates-hack",
   "version": "0.0.0",
   "description": "Revocable, Self-Signed TLS Certificates",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/ChristopherA/revocable-self-signed-tls-certificates-hack.git"
