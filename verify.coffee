@@ -18,21 +18,22 @@ checkTruth = (error, info) ->
     console.error error
   else
     log info
-    { balance, totalReceived, totalSent } = info
-    if balance > 0 and totalSent is 0
+    { balance, totalReceived, totalSent, unconfirmedBalance } = info
+    if balance is 0 and unconfirmedBalance > 0
+      log "---> awaiting network confirmation"
+    else if balance is 0
+      log "---> awaiting claim"
+    else if balance > 0 and totalSent is 0
       log "---> claim maintained"
-    else
+    else if balance > 0 and totalSent > 0
       log "---> claim revoked"
-
-address = 'mtPzC1nxwaMk4gbXdrzTQPVchYJQoZWzjB'
-# insight = new Insight('https://test-insight.bitpay.com', bitcore.Networks.testnet)
-# insight.address address, checkTruth
-
+    else
+      log "---> claim state unknown"
 
 # extract bitcoin address
 
 getAddressFromCert = (cert)->
-  certText = exec "openssl x509 -noout -text -in #{cert}"
+  certText = exec "openssl x509 -noout -text -in #{cert}", silent: true
   log '---------'
   # Subject: C=NO, ST=None, L=Aethers, O=OrgName, OU=n3kTRVniUF4zSx744JthxGh4qxnNYRnJqi, CN=www.mydomain.com
   m = certText.output.match /\n\s+Subject:.*OU=(\w+), /
@@ -41,6 +42,7 @@ getAddressFromCert = (cert)->
 address = getAddressFromCert "tmp/certs/www.mydomain.com.cert"
 
 log address
-
+insight = new Insight('https://test-insight.bitpay.com', bitcore.Networks.testnet)
+insight.address address, checkTruth
 
 # look at that address' transaction's op return -- see that it matches

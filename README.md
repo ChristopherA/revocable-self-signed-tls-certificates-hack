@@ -165,3 +165,16 @@ The certificate issuer downloads our code from github and runs the client from t
 The validity of the unspent bitcoin and the hash of the certificate can be verified by many services.
 
 We install the self-signed certificate in a node TLS web server. We then demonstrate a node client using a modified javascript-based TLS client that connects to that server and confirms that the certificate and the unspent bitcoin address is valid. We then spend the paper wallet using an iPhone, and have the same server say it is invalid.
+
+Example Usage
+-------------
+
+    ./create.coffee
+
+
+Go [put 500000 Satoshis](https://accounts.blockcypher.com/testnet-faucet) on the returned BTC address
+
+    ./verify.coffee
+
+Should be pending, for a while, then true, once the trancaction clears.
+

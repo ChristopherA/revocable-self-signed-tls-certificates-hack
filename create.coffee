@@ -5,16 +5,6 @@ log = lightsaber.log
 bitcore = require 'bitcore'
 require 'shelljs/global'
 
-privateKey = new bitcore.PrivateKey null, bitcore.Networks.testnet
-# log(privateKey)
-address = privateKey.toAddress()
-# log(address)
-
-if not which 'openssl'
-  echo 'Sorry, this script requires openssl'
-  exit 1
-
-
 generateCert = (domainName, btcAddress)->
   mkdir '-p', 'tmp/certs'
   cd 'tmp/certs'
@@ -24,7 +14,7 @@ generateCert = (domainName, btcAddress)->
   exec """
   openssl req \
       -new \
-      -newkey rsa:4096 \
+      -newkey rsa:2048 \
       -nodes \
       -x509 \
       -days 365 \
@@ -33,4 +23,14 @@ generateCert = (domainName, btcAddress)->
       -out #{domainName}.cert
   """
 
+privateKey = new bitcore.PrivateKey null, bitcore.Networks.testnet
+# log(privateKey)
+address = privateKey.toAddress()
+
+if not which 'openssl'
+  echo 'Sorry, this script requires openssl'
+  exit 1
+
 generateCert("www.mydomain.com", address)
+
+log "New bitcoin address: " + address
