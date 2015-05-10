@@ -169,6 +169,8 @@ We install the self-signed certificate in a node TLS web server. We then demonst
 Example Usage
 -------------
 
+    npm install
+
     ./create.coffee
 
 
