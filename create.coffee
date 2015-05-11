@@ -1,7 +1,6 @@
 #!/usr/bin/env coffee
 
-lightsaber = require 'lightsaber'
-log = lightsaber.log
+{ log } = require 'lightsaber'
 bitcore = require 'bitcore'
 require 'shelljs/global'
 
@@ -31,6 +30,6 @@ if not which 'openssl'
   echo 'Sorry, this script requires openssl'
   exit 1
 
-generateCert("www.mydomain.com", address)
+generateCert "www.mydomain.com", address
 
 log "New bitcoin address: " + address
