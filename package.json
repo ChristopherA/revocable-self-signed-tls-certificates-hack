@@ -8,8 +8,8 @@
   },
   "scripts": {
     "compile": "coffee -c -o tmp .",
-    "create": "./create.coffee",
-    "verify": "./verify.coffee"
+    "create": "coffee create",
+    "verify": "coffee verify"
   },
   "keywords": [
     "tls",
