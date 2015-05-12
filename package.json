@@ -8,8 +8,8 @@
   },
   "scripts": {
     "compile": "coffee -c -o tmp .",
-    "create": "coffee create",
-    "verify": "coffee verify"
+    "create": "./create",
+    "verify": "./verify"
   },
   "keywords": [
     "tls",
@@ -27,6 +27,7 @@
     "bitcore-explorers": "^0.11.0",
     "coffee-script": "^1.9.2",
     "lightsaber": "^0.4.1",
+    "node-forge": "^0.6.26",
     "shelljs": "^0.4.0"
   }
 }

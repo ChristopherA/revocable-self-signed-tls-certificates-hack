@@ -3,33 +3,72 @@
 { log } = require 'lightsaber'
 bitcore = require 'bitcore'
 require 'shelljs/global'
+forge = require 'node-forge'
 
-generateCert = (domainName, btcAddress)->
-  mkdir '-p', 'tmp/certs'
-  cd 'tmp/certs'
+digest = (text, options) ->
+  options.encoding ?= 'utf-8'
+  message_digest = forge.md[options.algorithm].create()
+  message_digest.update text, options.encoding
+  {
+    message_digest
+    hex: message_digest.digest().toHex()
+  }
 
-  certSubject = "/C=NO/ST=None/L=Aethers/O=OrgName/OU=#{btcAddress}/CN=#{domainName}"
-
-  exec """
-  openssl req \
-      -new \
-      -newkey rsa:2048 \
-      -nodes \
-      -x509 \
-      -days 365 \
-      -subj #{certSubject} \
-      -keyout #{domainName}.key \
-      -out #{domainName}.cert
-  """
-
-privateKey = new bitcore.PrivateKey null, bitcore.Networks.testnet
-# log(privateKey)
-address = privateKey.toAddress()
+#################################
+# main
+#################################
 
 if not which 'openssl'
   echo 'Sorry, this script requires openssl'
   exit 1
 
-generateCert "www.mydomain.com", address
+#################################
+# bitcoin address
+#################################
 
-log "New bitcoin address: " + address
+privateKey = new bitcore.PrivateKey null, bitcore.Networks.testnet
+# log(privateKey)
+btcAddress = privateKey.toAddress()
+
+#################################
+# generate cert
+#################################
+
+domainName =  "www.mydomain.com"
+mkdir '-p', 'tmp/certs'
+cd 'tmp/certs'
+
+certSubject = "/C=NO/ST=None/L=Aethers/O=OrgName/OU=#{btcAddress}/CN=#{domainName}"
+
+cmd = """
+  openssl req \
+    -new \
+    -newkey rsa:2048 \
+    -nodes \
+    -x509 \
+    -days 365 \
+    -subj "#{certSubject}" \
+    -keyout #{domainName}.key \
+    -out #{domainName}.cert
+"""
+# log cmd
+exec cmd
+
+#################################
+# getSignatureFromCert
+#################################
+
+cert = "#{domainName}.cert"
+cmd = "openssl x509 -noout -text -in #{cert}"
+# log cmd
+certText = exec cmd, silent: true
+# log certText.output
+m = certText.output.match /\n\s+Signature Algorithm: sha1WithRSAEncryption\s*((?:[0-9a-f]{2}[:\s]+)+)/
+block = m[1]
+text = block.replace /\W/g, ''
+buf = new Buffer text, 'hex'
+signatureDigest = digest buf, algorithm: 'sha1', encoding: 'HEX'
+signatureSha1 = signatureDigest.hex
+
+log "Signature SHAg1: " + signatureSha1
+log "New bitcoin address: " + btcAddress
