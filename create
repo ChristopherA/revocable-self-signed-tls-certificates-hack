@@ -67,8 +67,8 @@ m = certText.output.match /\n\s+Signature Algorithm: sha1WithRSAEncryption\s*((?
 block = m[1]
 text = block.replace /\W/g, ''
 buf = new Buffer text, 'hex'
-signatureDigest = digest buf, algorithm: 'sha1', encoding: 'HEX'
-signatureSha1 = signatureDigest.hex
+signatureDigest = digest buf, algorithm: 'sha256', encoding: 'HEX'
+signatureSha256 = signatureDigest.hex
 
-log "Signature SHAg1: " + signatureSha1
+log "Signature Hash (sha256): " + signatureSha256
 log "New bitcoin address: " + btcAddress
