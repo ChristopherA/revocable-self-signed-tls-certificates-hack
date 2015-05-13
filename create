@@ -70,5 +70,6 @@ buf = new Buffer text, 'hex'
 signatureDigest = digest buf, algorithm: 'sha256', encoding: 'HEX'
 signatureSha256 = signatureDigest.hex
 
-log "Signature Hash (sha256): " + signatureSha256
-log "New bitcoin address: " + btcAddress
+log "Certificate Validity Bitcoin Address: " + btcAddress
+log "Certificate Signature (sha1WithRSAEncryption): " + text
+log "Blockchain Proof of Existence (sha256): " + signatureSha256
