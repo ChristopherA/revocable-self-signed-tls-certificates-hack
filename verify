@@ -24,13 +24,23 @@ checkTruth = (error, info) ->
       log "---> (claim state unknown)"
     log ''
 
-# Extract bitcoin address
+# Validate self-signed certificate signatures and expiration
+
+validateCertSignature = (cert) ->
+  certText = exec "openssl verify -CAfile #{cert} #{cert}", silent: true
+  # need regex to delete filename and just output OK or errors.
+  log "Certificate validity: " + certText.output
+
+# Extract bitcoin address from certificate
+
 getAddressFromCert = (cert) ->
   certText = exec "openssl x509 -noout -text -in #{cert}", silent: true
   # Subject: C=NO, ST=None, L=Aethers, O=OrgName, OU=n3kTRVniUF4zSx744JthxGh4qxnNYRnJqi, CN=www.mydomain.com
+
   m = certText.output.match /\n\s+Subject:.*\bOU=(\w+)\b/
   m[1]
 
+certsignaturevalid = validateCertSignature "tmp/certs/www.mydomain.com.cert"
 address = getAddressFromCert "tmp/certs/www.mydomain.com.cert"
 insight = new Insight 'https://test-insight.bitpay.com', bitcore.Networks.testnet
 insight.address address, checkTruth
