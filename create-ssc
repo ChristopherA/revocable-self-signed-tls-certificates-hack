@@ -42,23 +42,9 @@ privateKeyWIF = privateKey.toWIF()
 # save wif
 #################################
 
-<<<<<<< HEAD:create-ssc
-cmd = """
-  echo "#{privateKeyWIF}" > #{domainName}.wif
-"""
-# log cmd
-exec cmd
-
-cmd = """
-  echo "#{btcAddress}" > #{domainName}.btc
-"""
-# log cmd
-exec cmd
-
-
-=======
 exec "echo '#{privateKeyWIF}' > #{domainName}.wif"
->>>>>>> Update formatting, logging.:create
+exec "echo '#{btcAddress}' > #{domainName}.btc"
+
 
 #################################
 # generate cert
