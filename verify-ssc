@@ -11,15 +11,15 @@ checkTruth = (error, info) ->
   else
     log info
     log ''
-    { balance, totalReceived, totalSent, unconfirmedBalance } = info
-    if balance is 0 and unconfirmedBalance is 0
-      log "---> awaiting claim"
+    { address, balance, totalReceived, totalSent, unconfirmedBalance } = info
+    if totalSent > 0
+      log "---> claim revoked"
+    else if balance is 0 and unconfirmedBalance is 0
+      log "---> awaiting claim: Please deposit 0.005 BTC to #{address}"
     else if balance is 0 and unconfirmedBalance > 0
       log "---> awaiting network confirmation"
     else if balance > 0 and totalSent is 0
       log "---> claim maintained"
-    else if balance > 0 and totalSent > 0
-      log "---> claim revoked"
     else
       log "---> (claim state unknown)"
     log ''
