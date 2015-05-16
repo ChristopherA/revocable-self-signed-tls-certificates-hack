@@ -73,7 +73,7 @@ Creating the Self-Signed Certificate
 
 First we create a brand new bitcoin address (for instance 1DG4Nd7ZBWoQz76g2jSa64e7Q9QWWem5Cd), which means that we now have a private key, an associated public key, a bitcoin address (the hash of that public key). If we did everything correctly, the bitcoin blockchain should report that there have never been any transactions associated with that new bitcoin address since the creation of the blockchain. https://blockchain.info/address/1DG4Nd7ZBWoQz76g2jSa64e7Q9QWWem5Cd
 
-We now create the self-signed certificate with standard tools. In the case of OpenSSL we are not going to make any changes to its signing code, so for this hack we are going to use the often unused `Organizational Unit Name` attribute and place our new bitcoin address in that field. Signing the certificate results in: 
+We now create the self-signed certificate with standard tools. In the case of OpenSSL we are not going to make any changes to its signing code, so for this hack we are going to use the often unused `Organizational Unit Name` attribute and place our new bitcoin address in that field. Signing the certificate results in:
 
 ```
 $ openssl -x509 -sha256 -newkey rsa:2048 -req -days 365 -in server.csr -signkey server.key -out server.crt
@@ -124,7 +124,7 @@ In addition, Bitcoin offers something called paper wallets, so the keys to revok
 Advanced Revocation
 -------------------
 
-The above is a minimum-viable product, but there are many more things you can do with blockchain technology. 
+The above is a minimum-viable product, but there are many more things you can do with blockchain technology.
 
 * When we revoke the self-signed certificate by spending the money on the address, we can optionally place an OP_RETURN value to explain the reason why the self-signed certificate was revoked, for instance: key compromise, change of affiliation, superseded, cease of operation, or unspecified.
 
@@ -132,7 +132,7 @@ The above is a minimum-viable product, but there are many more things you can do
 
 * If we not only include the bitcoin address, but also sign it with the bitcoin address’ private key, we can now link bitcoin transactions to self-signed certificates. In this case, by convention if there is an OP_RETURN value that is the same certificate, or a new certificate, the new bitcoin address should be used for certificate status in the future. Using this technique repeatedly, using new bitcoin addresses that confirm or change certificates, you create a chain with strong proof-of-existence over time. Though each is only as strong as the previous certificate, there is value to the continuity over time of multiple claims -- if you trusted it six months ago you likely can trust it now (which is what happens with certificate pinning). Each certificate can be looked up by using the bitcoin address as an ID, validated against the ledger by the transaction ledger, and connected to future and past certificates by signature. You now have a fairly powerful validity system that may be more powerful than today.
 
-* With the transaction chains above, you could create conventions where someone must confirm daily that the certificate is valid. If the money is unspent without a link to the next bitcoin address for more than a day, it could be considered possibly compromised, and if for a week it could be considered invalid. 
+* With the transaction chains above, you could create conventions where someone must confirm daily that the certificate is valid. If the money is unspent without a link to the next bitcoin address for more than a day, it could be considered possibly compromised, and if for a week it could be considered invalid.
 
 * We could add to the revocation status list `certificate hold`. This means that the certificate is not valid until a future point of time. As blockchains offer strong proof of time, this technique offers a number of interesting advanced architectures.
 
@@ -171,21 +171,21 @@ Example Usage
 
     npm install
 
-    npm run create
-    
+    npm run create-ssc
+
 This creates a new RSA key pair, a new testnet bitcoin address, and a self-signed certificate with the bitcoin address embedded in it.
 
     openssl x509 -noout -text -in tmp/certs/www.mydomain.com.cert
-    
+
 This demonstrates that the self-signed certificate is valid, and that the testnet bitcoin address is listed in the Organizational Unit field.
-    
-    npm run verify
+
+    npm run verify-ssc
 
 The result should be "awaiting claim" as there are no transactions associated with the new address.
 
 Use a testnet bitcoin faucet to [put 500000 Satoshis](https://accounts.blockcypher.com/testnet-faucet) on the self-signed certificate's bitcoin address.
 
-    npm run verify
+    npm run verify-ssc
 
 The result will pending ("awaiting network confirmation") for up to 10 minutes, then will return true "claim maintained" once the transaction clears.
 
@@ -193,7 +193,7 @@ If there are any outgoing transactions on the bitcoin address, the result will b
 
 To Be Done
 ----------
-* `npm run create-temporary-wallet` should create a temporary bitcoin account that we will fill from a testnet faucet. 
+* `npm run create-temporary-wallet` should create a temporary bitcoin account that we will fill from a testnet faucet.
 * `npm run create-ssc` should sha256 hash from the self-signed certificates signature and then transfer from the temporary wallet's bitcoin address to the certificate's bitcoin address with an OP_RETURN of the signature hash.
 * `npm run verify-ssc` should first verify the self-signed certificate's signature,  confirm the embedded bitcoin address (as it does above), then retrieve the first transaction on that address to confirm that the signature hash matches.
 * `npm run revoke-ssc` should zero the balance of the certificate's address, returning it to the temporary wallet account along with an OP_RETURN with the reason for revocation.
