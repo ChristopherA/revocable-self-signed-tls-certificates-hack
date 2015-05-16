@@ -23,20 +23,35 @@ if not which 'openssl'
   exit 1
 
 #################################
-# bitcoin address
-#################################
-
-privateKey = new bitcore.PrivateKey null, bitcore.Networks.testnet
-# log(privateKey)
-btcAddress = privateKey.toAddress()
-
-#################################
-# generate cert
+# create tmp directory to store
 #################################
 
 domainName =  "www.mydomain.com"
 mkdir '-p', 'tmp/certs'
 cd 'tmp/certs'
+
+#################################
+# bitcoin address
+#################################
+
+privateKey = new bitcore.PrivateKey null, bitcore.Networks.testnet
+btcAddress = privateKey.toAddress()
+privateKeyWIF = privateKey.toWIF()
+
+#################################
+# save wif
+#################################
+
+cmd = """
+  echo "#{privateKeyWIF}" > #{domainName}.wif
+"""
+# log cmd
+exec cmd
+
+
+#################################
+# generate cert
+#################################
 
 certSubject = "/C=NO/ST=None/L=Aethers/O=OrgName/OU=#{btcAddress}/CN=#{domainName}"
 
@@ -70,6 +85,7 @@ buf = new Buffer text, 'hex'
 signatureDigest = digest buf, algorithm: 'sha256', encoding: 'HEX'
 signatureSha256 = signatureDigest.hex
 
+log "Certificate Validity WIF Private: " + privateKeyWIF
 log "Certificate Validity Bitcoin Address: " + btcAddress
 log "Certificate Signature (sha1WithRSAEncryption): " + text
 log "Blockchain Proof of Existence (sha256): " + signatureSha256
