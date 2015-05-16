@@ -7,7 +7,7 @@
     "url": "https://github.com/ChristopherA/revocable-self-signed-tls-certificates-hack.git"
   },
   "scripts": {
-    "compile": "coffee -c -o tmp .",
+    "compile": "node_modules/.bin/coffee -c -b -o tmp/ create verify",
     "create": "./create",
     "verify": "./verify"
   },
