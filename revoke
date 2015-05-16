@@ -1,0 +1,28 @@
+#!/usr/bin/env coffee
+
+API_KEY = "79df606bf1720d285f1f5f717827f557" # blockcypher.com, dukedorje's account
+
+{ log } = require 'lightsaber'
+bitcore = require 'bitcore'
+
+domainName = "www.mydomain.com"
+
+# Get private key
+fs = require('fs');
+keyWIF = fs.readFileSync("tmp/certs/#{domainName}.wif", encoding: 'ascii').replace(/\W/g, '')
+privateKey = bitcore.PrivateKey.fromWIF(keyWIF)
+
+# txn = new bitcore.Transaction
+#   .from
+#     address:"msEVqNta83jfEarrZ146TcA7weHFLpyY1g"
+#     txid:"99288a4c1e6ade0e63c9c484b1cdcc237b781f2f17a579bd8cd95fae7821b027"
+#     vout:0
+#     scriptPubKey:"76a9148084c4319262af8b66b8ae7843fe5d8077fecb7988ac"
+#     amount:0.005
+#   .to('mwmabpJVisvti3WEP5vhFRtn3yqHRD9KNP', 5000000)
+#   .sign('2cb409a0a9a9194037979f74a962cab2c0f5804888e2d0fecb6658a247b9e02e')
+
+log keyWIF
+
+# log txn
+

@@ -25,18 +25,16 @@ checkTruth = (error, info) ->
     log ''
 
 # Validate self-signed certificate signatures and expiration
-
 validateCertSignature = (cert) ->
   certText = exec "openssl verify -CAfile #{cert} #{cert}", silent: true
   # need regex to delete filename and just output OK or errors.
   log "Certificate validity: " + certText.output
 
 # Extract bitcoin address from certificate
-
 getAddressFromCert = (cert) ->
   certText = exec "openssl x509 -noout -text -in #{cert}", silent: true
-  # Subject: C=NO, ST=None, L=Aethers, O=OrgName, OU=n3kTRVniUF4zSx744JthxGh4qxnNYRnJqi, CN=www.mydomain.com
 
+  # Subject: C=NO, ST=None, L=Aethers, O=OrgName, OU=n3kTRVniUF4zSx744JthxGh4qxnNYRnJqi, CN=www.mydomain.com
   m = certText.output.match /\n\s+Subject:.*\bOU=(\w+)\b/
   m[1]
 

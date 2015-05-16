@@ -42,6 +42,7 @@ privateKeyWIF = privateKey.toWIF()
 # save wif
 #################################
 
+<<<<<<< HEAD:create-ssc
 cmd = """
   echo "#{privateKeyWIF}" > #{domainName}.wif
 """
@@ -55,6 +56,9 @@ cmd = """
 exec cmd
 
 
+=======
+exec "echo '#{privateKeyWIF}' > #{domainName}.wif"
+>>>>>>> Update formatting, logging.:create
 
 #################################
 # generate cert
@@ -62,7 +66,7 @@ exec cmd
 
 certSubject = "/C=NO/ST=None/L=Aethers/O=OrgName/OU=#{btcAddress}/CN=#{domainName}"
 
-cmd = """
+exec """
   openssl req \
     -new \
     -newkey rsa:2048 \
@@ -73,22 +77,17 @@ cmd = """
     -keyout #{domainName}.key \
     -out #{domainName}.cert
 """
-# log cmd
-exec cmd
-
 #################################
 # getSignatureFromCert
 #################################
 
 cert = "#{domainName}.cert"
-cmd = "openssl x509 -noout -text -in #{cert}"
-# log cmd
-certText = exec cmd, silent: true
-# log certText.output
-m = certText.output.match /\n\s+Signature Algorithm: sha1WithRSAEncryption\s*((?:[0-9a-f]{2}[:\s]+)+)/
-block = m[1]
-text = block.replace /\W/g, ''
-buf = new Buffer text, 'hex'
+certText = exec "openssl x509 -noout -text -in #{cert}", silent: true
+
+match = certText.output.match /\n\s+Signature Algorithm: sha1WithRSAEncryption\s*((?:[0-9a-f]{2}[:\s]+)+)/
+block = match[1]
+signature = block.replace /\W/g, ''
+buf = new Buffer signature, 'hex'
 signatureDigest = digest buf, algorithm: 'sha256', encoding: 'HEX'
 signatureSha256 = signatureDigest.hex
 
@@ -96,13 +95,13 @@ signatureSha256 = signatureDigest.hex
 # save hashed signature
 #################################
 
-cmd = """
-  echo "#{signatureSha256}" > #{domainName}.sighash
-"""
-# log cmd
-exec cmd
+exec "echo '#{signatureSha256}' > #{domainName}.sighash"
 
-log "Certificate Validity WIF Private: " + privateKeyWIF
+log ""
 log "Certificate Validity Bitcoin Address: " + btcAddress
-log "Certificate Signature (sha1WithRSAEncryption): " + text
+log "Certificate Validity WIF Private: " + privateKeyWIF
+log ""
+log "Certificate Signature (sha1WithRSAEncryption): " + signature
 log "Hash of the Certificate Signature (sha256): " + signatureSha256
+log ""
+log "Put 500000 Satoshis (https://accounts.blockcypher.com/testnet-faucet) to this address."
