@@ -1,0 +1,43 @@
+#!/usr/bin/env coffee
+
+{ log } = require 'lightsaber'
+bitcore = require 'bitcore'
+require 'shelljs/global'
+forge = require 'node-forge'
+
+#################################
+# create tmp directory to store
+#################################
+
+domainName =  "www.mydomain.com"
+mkdir '-p', 'tmp/certs'
+cd 'tmp/certs'
+
+#################################
+# house bitcoin address
+#################################
+
+hosePrivateKey = new bitcore.PrivateKey null, bitcore.Networks.testnet
+hoseBtcAddress = hosePrivateKey.toAddress()
+hosePrivateKeyWIF = hosePrivateKey.toWIF()
+
+#################################
+# save wif & address
+#################################
+
+cmd = """
+  echo "#{hosePrivateKeyWIF}" > hose.wif
+"""
+# log cmd
+exec cmd
+
+cmd = """
+  echo "#{hoseBtcAddress}" > hose.btc
+"""
+# log cmd
+exec cmd
+
+
+log "Hose WIF Private Key: " + hosePrivateKey
+log "Hose Address: " + hoseBtcAddress
+log "Send 500000 Satoshis using faucet https://accounts.blockcypher.com/testnet-faucet to this hose address."

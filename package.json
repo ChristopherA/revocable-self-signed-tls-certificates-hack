@@ -7,9 +7,10 @@
     "url": "https://github.com/ChristopherA/revocable-self-signed-tls-certificates-hack.git"
   },
   "scripts": {
-    "compile": "node_modules/.bin/coffee -c -b -o tmp/ create-ssc verify-ssc",
+    "compile": "node_modules/.bin/coffee -c -b -o tmp/ establish-bitcoin-hose create-ssc verify-ssc",
     "create-ssc": "./create-ssc",
-    "verify-ssc": "./verify-ssc"
+    "verify-ssc": "./verify-ssc",
+    "establish-bitcoin-hose": "./establish-bitcoin-hose"
   },
   "keywords": [
     "tls",
