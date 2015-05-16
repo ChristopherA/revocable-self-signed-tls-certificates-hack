@@ -48,6 +48,13 @@ cmd = """
 # log cmd
 exec cmd
 
+cmd = """
+  echo "#{btcAddress}" > #{domainName}.btc
+"""
+# log cmd
+exec cmd
+
+
 
 #################################
 # generate cert
