@@ -1,0 +1,49 @@
+#!/usr/bin/env coffee
+
+{ log } = require 'lightsaber'
+bitcore = require 'bitcore'
+Insight = require('bitcore-explorers').Insight
+fs = require('fs');
+
+
+class RevokeCert
+  domainName: "www.mydomain.com"
+  returnAddr: "mwmabpJVisvti3WEP5vhFRtn3yqHRD9KNP" # specifically for testnet faucet
+  network: bitcore.Networks.testnet
+
+  constructor: ->
+    @insight = new Insight 'https://test-insight.bitpay.com', @network
+    @privateKey = @getPrivateKey()
+
+  getPrivateKey: ->
+    keyWIF = fs.readFileSync("tmp/certs/#{@domainName}.wif", encoding: 'ascii').replace(/\W/g, '')
+    bitcore.PrivateKey.fromWIF(keyWIF)
+
+  unspentTxns: (callback)->
+    address = @privateKey.toAddress(@network)
+    @insight.getUnspentUtxos address, callback
+
+  createTxn: (utxos)->
+    total = utxos[0].satoshis
+    fee = 10000 # parseInt(total * 0.01)
+
+    new bitcore.Transaction()
+      .from utxos[0]
+      .to(@returnAddr, (total-fee))
+      .sign(@privateKey)
+
+  broadcastTxn: (txn, callback)->
+    @insight.broadcast txn
+
+
+rev = new RevokeCert
+rev.unspentTxns (error, utxos)->
+  if error
+    console.error error
+  else
+    txn = rev.createTxn(utxos)
+    rev.broadcastTxn txn, (error, txnid)->
+      if error
+        console.error error
+      else
+        log "Transaction ID: #{txnid}"

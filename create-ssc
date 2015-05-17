@@ -90,5 +90,4 @@ log ""
 log "Certificate Signature (sha1WithRSAEncryption): " + signature
 log "Hash of the Certificate Signature (sha256): " + signatureSha256
 log ""
-log "Please put 500000 Satoshis to #{btcAddress} to maintain this claim."
-log "https://accounts.blockcypher.com/testnet-faucet"
+log "Please put 0.005 BTC to #{btcAddress} to maintain this claim. (TestNet only)"
