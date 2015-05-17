@@ -5,42 +5,48 @@ require 'shelljs/global'
 bitcore = require 'bitcore'
 Insight = require('bitcore-explorers').Insight
 
-checkTruth = (error, info) ->
-  if error
-    console.error error
-  else
-    log info
-    log ''
-    { address, balance, totalReceived, totalSent, unconfirmedBalance } = info
-    if totalSent > 0
-      log "---> claim revoked"
-    else if balance is 0 and unconfirmedBalance is 0
-      log "---> awaiting claim: Please deposit 0.005 BTC to #{address}"
-    else if balance is 0 and unconfirmedBalance > 0
-      log "---> awaiting network confirmation"
-    else if balance > 0 and totalSent is 0
-      log "---> claim maintained"
+class VerifyCert
+  constructor: (@certFile)->
+
+  checkTruth: (error, info) ->
+    if error
+      console.error error
     else
-      log "---> (claim state unknown)"
-    log ''
+      log info
+      log ''
+      { address, balance, totalReceived, totalSent, unconfirmedBalance } = info
+      if totalSent > 0
+        log "---> claim revoked"
+      else if balance is 0 and unconfirmedBalance is 0
+        log "---> awaiting claim"
+      else if balance is 0 and unconfirmedBalance > 0
+        log "---> awaiting network confirmation"
+      else if balance > 0 and totalSent is 0
+        log "---> claim maintained"
+      else
+        log "---> (claim state unknown)"
+      log ''
 
-# Validate self-signed certificate signatures and expiration
-validateCertSignature = (cert) ->
-  certText = exec "openssl verify -CAfile #{cert} #{cert}", silent: true
-  # need regex to delete filename and just output OK or errors.
-  log "Certificate validity: " + certText.output
+  # Validate self-signed certificate signatures and expiration
+  validateCertSignature: (cert) ->
+    certText = exec "openssl verify -CAfile #{@certFile} #{@certFile}", silent: true
+    certText.output
 
-# Extract bitcoin address from certificate
-getAddressFromCert = (cert) ->
-  certText = exec "openssl x509 -noout -text -in #{cert}", silent: true
+  # Extract bitcoin address from certificate
+  getAddressFromCert: (cert) ->
+    certText = exec "openssl x509 -noout -text -in #{@certFile}", silent: true
 
-  # Subject: C=NO, ST=None, L=Aethers, O=OrgName, OU=n3kTRVniUF4zSx744JthxGh4qxnNYRnJqi, CN=www.mydomain.com
-  m = certText.output.match /\n\s+Subject:.*\bOU=(\w+)\b/
-  m[1]
+    # Subject: C=NO, ST=None, L=Aethers, O=OrgName, OU=n3kTRVniUF4zSx744JthxGh4qxnNYRnJqi, CN=www.mydomain.com
+    m = certText.output.match /\n\s+Subject:.*\bOU=(\w+)\b/
+    m[1]
 
-certsignaturevalid = validateCertSignature "tmp/certs/www.mydomain.com.cert"
-address = getAddressFromCert "tmp/certs/www.mydomain.com.cert"
+
+verify = new VerifyCert("tmp/certs/www.mydomain.com.cert")
 insight = new Insight 'https://test-insight.bitpay.com', bitcore.Networks.testnet
-insight.address address, checkTruth
 
-# look at that address' transaction's op return -- see that it matches
+log "Certificate validity: " + verify.validateCertSignature()
+
+address = verify.getAddressFromCert()
+insight.address address, verify.checkTruth
+
+# TODO: look at that address' transaction's OP_RETURN -- see that it matches cert signature

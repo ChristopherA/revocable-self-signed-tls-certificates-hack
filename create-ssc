@@ -4,90 +4,104 @@
 bitcore = require 'bitcore'
 require 'shelljs/global'
 forge = require 'node-forge'
-
-digest = (text, options) ->
-  options.encoding ?= 'utf-8'
-  message_digest = forge.md[options.algorithm].create()
-  message_digest.update text, options.encoding
-  {
-    message_digest
-    hex: message_digest.digest().toHex()
-  }
-
-#################################
-# main
-#################################
+fs = require('fs');
 
 if not which 'openssl'
   echo 'Sorry, this script requires openssl'
   exit 1
 
-#################################
-# create tmp directory to store
-#################################
 
-domainName =  "www.mydomain.com"
-mkdir '-p', 'tmp/certs'
-cd 'tmp/certs'
+class ClaimData
+  domainName:  "www.mydomain.com"
+  networkName: 'testnet'
 
-#################################
-# bitcoin address
-#################################
+  constructor: (serialized)->
+    if serialized?
+      @deserialize(serialized)
+    else
+      @destinationPK = new bitcore.PrivateKey null, @network() # dest addr with OP_RETURN txn
+      @tempPK = new bitcore.PrivateKey null, @network() # temporary address for user's initial txn
 
-privateKey = new bitcore.PrivateKey null, bitcore.Networks.testnet
-btcAddress = privateKey.toAddress()
-privateKeyWIF = privateKey.toWIF()
+  destinationAddress: ->
+    @destinationPK.toAddress(@network())
 
-#################################
-# save wif
-#################################
+  tempAddress: ->
+    @tempPK.toAddress(@network())
 
-exec "echo '#{privateKeyWIF}' > #{domainName}.wif"
-exec "echo '#{btcAddress}' > #{domainName}.btc"
+  serialize: ->
+    {
+      domainName:        @domainName
+      network:           @networkName
+      destinationPK:     @destinationPK.toWIF()
+      tempPK:            @tempPK.toWIF()
+      certSignatureHash: @certSignatureHash
+    }
+
+  deserialize: (obj)->
+
+  network: ->
+    if @networkName == 'testnet'
+      bitcore.Networks.testnet
+
+class CreateCert
+  constructor: ->
+    mkdir '-p', 'tmp/certs'
+    cd 'tmp/certs'
+    @data = new ClaimData()
+
+  generateCert: ->
+    btcAddress = @data.destinationAddress()
+    domainName = @data.domainName
+
+    certSubject = "/C=US/ST=CA/L=San Francisco/O=OrgName/OU=#{btcAddress}/CN=#{domainName}"
+    exec """
+      openssl req \
+        -new \
+        -newkey rsa:2048 \
+        -nodes \
+        -x509 \
+        -days 365 \
+        -subj "#{certSubject}" \
+        -keyout #{domainName}.key \
+        -out #{domainName}.cert
+    """
+
+    @data.certSignatureHash = @certSignatureHash()
+
+  certSignature: ->
+    cert = "#{@data.domainName}.cert"
+    certText = exec "openssl x509 -noout -text -in #{cert}", silent: true
+
+    match = certText.output.match /\n\s+Signature Algorithm: sha1WithRSAEncryption\s*((?:[0-9a-f]{2}[:\s]+)+)/
+    signature = match[1].replace /\W/g, ''
+
+  certSignatureHash: ->
+    buffer = new Buffer @certSignature(), 'hex'
+    @digest buffer, encoding: 'HEX'
+
+  digest: (text, options) ->
+    options.encoding ?= 'utf-8'
+    options.algorithm ?= 'sha256'
+    message_digest = forge.md[options.algorithm].create()
+    message_digest.update text, options.encoding
+    message_digest.digest().toHex()
+
+  saveData: ->
+    dataObj = @data.serialize()
+    filename = "#{@data.domainName}.json"
+    fs.writeFile(filename, JSON.stringify(dataObj))
 
 
-#################################
-# generate cert
-#################################
+create = new CreateCert()
+create.generateCert()
+create.saveData()
 
-certSubject = "/C=NO/ST=None/L=Aethers/O=OrgName/OU=#{btcAddress}/CN=#{domainName}"
-
-exec """
-  openssl req \
-    -new \
-    -newkey rsa:2048 \
-    -nodes \
-    -x509 \
-    -days 365 \
-    -subj "#{certSubject}" \
-    -keyout #{domainName}.key \
-    -out #{domainName}.cert
-"""
-#################################
-# getSignatureFromCert
-#################################
-
-cert = "#{domainName}.cert"
-certText = exec "openssl x509 -noout -text -in #{cert}", silent: true
-
-match = certText.output.match /\n\s+Signature Algorithm: sha1WithRSAEncryption\s*((?:[0-9a-f]{2}[:\s]+)+)/
-block = match[1]
-signature = block.replace /\W/g, ''
-buf = new Buffer signature, 'hex'
-signatureDigest = digest buf, algorithm: 'sha256', encoding: 'HEX'
-signatureSha256 = signatureDigest.hex
-
-#################################
-# save hashed signature
-#################################
-
-exec "echo '#{signatureSha256}' > #{domainName}.sighash"
-
+log create.data.serialize()
 log ""
-log "Certificate Validity Bitcoin Address: " + btcAddress
-log "Certificate Validity WIF Private: " + privateKeyWIF
+log "Certificate Validity Bitcoin Address: " + create.data.destinationAddress()
+log "Certificate Validity WIF Private: " + create.data.destinationPK.toWIF()
 log ""
-log "Certificate Signature (sha1WithRSAEncryption): " + signature
-log "Hash of the Certificate Signature (sha256): " + signatureSha256
+log "Certificate Signature (sha1WithRSAEncryption): " + create.certSignature()
+log "Hash of the Certificate Signature (sha256): " + create.data.certSignatureHash
 log ""
-log "Please put 0.005 BTC to #{btcAddress} to maintain this claim. (TestNet only)"
+log "Please put 0.005 BTC to #{create.data.tempAddress()} to maintain this claim. (TestNet)"
