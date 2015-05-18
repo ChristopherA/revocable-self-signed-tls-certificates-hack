@@ -16,7 +16,7 @@ class ClaimCert
     @insight.getUnspentUtxos @data.tempAddress(), (err, utxos)=>
       log utxos
       total = utxos[0].satoshis
-      fee = 100000
+      fee = 10000
 
       # TODO: OP_RETURN
       txn = new bitcore.Transaction()

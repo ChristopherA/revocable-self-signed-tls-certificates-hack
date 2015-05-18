@@ -4,6 +4,7 @@
 fs = require 'fs'
 bitcore = require 'bitcore'
 Insight = require('bitcore-explorers').Insight
+ClaimData = require './src/ClaimData.coffee'
 
 
 class RevokeCert
@@ -11,13 +12,10 @@ class RevokeCert
   returnAddr: "mwmabpJVisvti3WEP5vhFRtn3yqHRD9KNP" # specifically for testnet faucet
   network: bitcore.Networks.testnet
 
-  constructor: ->
+  constructor: (dataFile)->
+    @data = ClaimData.load(dataFile)
     @insight = new Insight 'https://test-insight.bitpay.com', @network
-    @privateKey = @getPrivateKey()
-
-  getPrivateKey: ->
-    keyWIF = fs.readFileSync("tmp/certs/#{@domainName}.wif", encoding: 'ascii').replace(/\W/g, '')
-    bitcore.PrivateKey.fromWIF(keyWIF)
+    @privateKey = @data.destinationPK
 
   unspentTxns: (callback)->
     address = @privateKey.toAddress(@network)
@@ -25,7 +23,7 @@ class RevokeCert
 
   createTxn: (utxos)->
     total = utxos[0].satoshis
-    fee = 10000 # parseInt(total * 0.01)
+    fee = 10000
 
     new bitcore.Transaction()
       .from utxos[0]
@@ -35,15 +33,20 @@ class RevokeCert
   broadcastTxn: (txn, callback)->
     @insight.broadcast txn, callback
 
-
-rev = new RevokeCert
+domainName = "www.mydomain.com"
+rev = new RevokeCert("tmp/certs/#{domainName}.json")
+log "Emptying claim address #{rev.data.destinationPK.toAddress(rev.data.network())}"
 rev.unspentTxns (error, utxos)->
   if error
     console.error error
   else
-    txn = rev.createTxn(utxos)
-    rev.broadcastTxn txn, (err, txnid)->
-      if err
-        console.error err
-      else
-        log "Transaction ID: #{txnid}"
+    if utxos.length == 0
+      log "No unspent transactions (address already empty)."
+    else
+      txn = rev.createTxn(utxos)
+      log "Broadcasting revocation transaction: #{txn.serialize()}"
+      rev.broadcastTxn txn, (err, txnid)->
+        if err
+          console.error err
+        else
+          log "Transaction ID: #{txnid}"
