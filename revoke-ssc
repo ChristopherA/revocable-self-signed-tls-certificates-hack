@@ -1,9 +1,9 @@
 #!/usr/bin/env coffee
 
 { log } = require 'lightsaber'
+fs = require 'fs'
 bitcore = require 'bitcore'
 Insight = require('bitcore-explorers').Insight
-fs = require('fs');
 
 
 class RevokeCert
@@ -33,7 +33,7 @@ class RevokeCert
       .sign(@privateKey)
 
   broadcastTxn: (txn, callback)->
-    @insight.broadcast txn
+    @insight.broadcast txn, callback
 
 
 rev = new RevokeCert
@@ -42,8 +42,8 @@ rev.unspentTxns (error, utxos)->
     console.error error
   else
     txn = rev.createTxn(utxos)
-    rev.broadcastTxn txn, (error, txnid)->
-      if error
-        console.error error
+    rev.broadcastTxn txn, (err, txnid)->
+      if err
+        console.error err
       else
         log "Transaction ID: #{txnid}"

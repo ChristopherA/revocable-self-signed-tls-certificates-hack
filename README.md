@@ -173,7 +173,7 @@ Example Usage
 
     npm run establish-bitcoin-hose
 
-Creates a temporary bitcoin account that we will fill from a [testnet faucet](https://accounts.blockcypher.com/testnet-faucet) [2](http://www.bitcointestnetfaucet.com/).
+Creates a temporary bitcoin account that we will fill from a [testnet faucet](https://accounts.blockcypher.com/testnet-faucet) [2](http://www.bitcointestnetfaucet.com/) [3](http://faucet.haskoin.com/).
 
     Send [500000 Satoshis](https://accounts.blockcypher.com/testnet-faucet) to hose.
 

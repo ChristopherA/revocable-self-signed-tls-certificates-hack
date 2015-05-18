@@ -1,47 +1,16 @@
 #!/usr/bin/env coffee
 
 { log } = require 'lightsaber'
-bitcore = require 'bitcore'
+fs = require 'fs'
 require 'shelljs/global'
+bitcore = require 'bitcore'
 forge = require 'node-forge'
-fs = require('fs');
+ClaimData = require './src/ClaimData.coffee'
 
 if not which 'openssl'
   echo 'Sorry, this script requires openssl'
   exit 1
 
-
-class ClaimData
-  domainName:  "www.mydomain.com"
-  networkName: 'testnet'
-
-  constructor: (serialized)->
-    if serialized?
-      @deserialize(serialized)
-    else
-      @destinationPK = new bitcore.PrivateKey null, @network() # dest addr with OP_RETURN txn
-      @tempPK = new bitcore.PrivateKey null, @network() # temporary address for user's initial txn
-
-  destinationAddress: ->
-    @destinationPK.toAddress(@network())
-
-  tempAddress: ->
-    @tempPK.toAddress(@network())
-
-  serialize: ->
-    {
-      domainName:        @domainName
-      network:           @networkName
-      destinationPK:     @destinationPK.toWIF()
-      tempPK:            @tempPK.toWIF()
-      certSignatureHash: @certSignatureHash
-    }
-
-  deserialize: (obj)->
-
-  network: ->
-    if @networkName == 'testnet'
-      bitcore.Networks.testnet
 
 class CreateCert
   constructor: ->
@@ -86,22 +55,16 @@ class CreateCert
     message_digest.update text, options.encoding
     message_digest.digest().toHex()
 
-  saveData: ->
-    dataObj = @data.serialize()
-    filename = "#{@data.domainName}.json"
-    fs.writeFile(filename, JSON.stringify(dataObj))
-
-
 create = new CreateCert()
 create.generateCert()
-create.saveData()
+create.data.save "#{create.data.domainName}.json"
 
 log create.data.serialize()
-log ""
-log "Certificate Validity Bitcoin Address: " + create.data.destinationAddress()
-log "Certificate Validity WIF Private: " + create.data.destinationPK.toWIF()
-log ""
-log "Certificate Signature (sha1WithRSAEncryption): " + create.certSignature()
-log "Hash of the Certificate Signature (sha256): " + create.data.certSignatureHash
-log ""
-log "Please put 0.005 BTC to #{create.data.tempAddress()} to maintain this claim. (TestNet)"
+# log ""
+# log "Certificate Validity Bitcoin Address: " + create.data.destinationAddress()
+# log "Certificate Validity WIF Private: " + create.data.destinationPK.toWIF()
+# log ""
+# log "Certificate Signature (sha1WithRSAEncryption): " + create.certSignature()
+# log "Hash of the Certificate Signature (sha256): " + create.data.certSignatureHash
+# log ""
+# log "Please put 0.005 BTC to #{create.data.tempAddress()} to maintain this claim. (TestNet)"

@@ -1,0 +1,50 @@
+#!/usr/bin/env coffee
+
+{ log } = require 'lightsaber'
+fs = require 'fs'
+bitcore = require 'bitcore'
+Insight = require('bitcore-explorers').Insight
+ClaimData = require './src/ClaimData.coffee'
+
+
+class ClaimCert
+  constructor: (dataFile)->
+    @data = ClaimData.load(dataFile)
+    @insight = new Insight 'https://test-insight.bitpay.com', @data.network()
+
+  transferToDestination: (callback)->
+    @insight.getUnspentUtxos @data.tempAddress(), (err, utxos)=>
+      log utxos
+      total = utxos[0].satoshis
+      fee = 100000
+
+      # TODO: OP_RETURN
+      txn = new bitcore.Transaction()
+        .from utxos[0]
+        .to(@data.destinationAddress(), (total-fee))
+        .sign(@data.tempPK)
+
+      log "Broadcasting transaction: #{txn.serialize()}"
+
+      @insight.broadcast txn
+
+  makeClaim: ->
+    @insight.address claim.data.tempAddress(), (err, info)->
+      if err
+        console.error err
+      else
+        log info
+        # if info.unconfirmedBalance > 0
+        #   log 'Awaiting network confirmation for initial transaction.'
+        # else if info.balance is 0
+        #   log "Please fund the initial address: #{claim.data.tempAddress()}"
+        # else
+        #   log "Initial address has been funded.  Transferring it to cert destination address."
+        #   claim.transferToDestination()
+    claim.transferToDestination()
+
+
+domainName = "www.mydomain.com"
+claim = new ClaimCert("tmp/certs/#{domainName}.json")
+
+claim.makeClaim()
