@@ -34,15 +34,13 @@ class ClaimCert
         console.error err
       else
         log info
-        # if info.unconfirmedBalance > 0
-        #   log 'Awaiting network confirmation for initial transaction.'
-        # else if info.balance is 0
-        #   log "Please fund the initial address: #{claim.data.tempAddress()}"
-        # else
-        #   log "Initial address has been funded.  Transferring it to cert destination address."
-        #   claim.transferToDestination()
-    claim.transferToDestination()
-
+        if info.unconfirmedBalance > 0
+          log 'Awaiting network confirmation for initial transaction.'
+        else if info.balance is 0
+          log "Please fund the initial address: #{claim.data.tempAddress()}"
+        else
+          log "Initial address has been funded.  Transferring it to cert destination address."
+          claim.transferToDestination()
 
 domainName = "www.mydomain.com"
 claim = new ClaimCert("tmp/certs/#{domainName}.json")
