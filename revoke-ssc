@@ -35,7 +35,7 @@ class RevokeCert
 
 domainName = "www.mydomain.com"
 rev = new RevokeCert("tmp/certs/#{domainName}.json")
-log "Emptying claim address #{rev.data.destinationPK.toAddress(rev.data.network())}"
+log "Emptying claim address #{rev.data.destinationAddress()}"
 rev.unspentTxns (error, utxos)->
   if error
     console.error error

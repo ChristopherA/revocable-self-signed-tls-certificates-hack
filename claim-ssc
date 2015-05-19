@@ -12,35 +12,27 @@ class ClaimCert
     @data = ClaimData.load(dataFile)
     @insight = new Insight 'https://test-insight.bitpay.com', @data.network()
 
-  transferToDestination: (callback)->
-    @insight.getUnspentUtxos @data.tempAddress(), (err, utxos)=>
-      log utxos
-      total = utxos[0].satoshis
-      fee = 10000
-
-      # TODO: OP_RETURN
-      txn = new bitcore.Transaction()
-        .from utxos[0]
-        .to(@data.destinationAddress(), (total-fee))
-        .sign(@data.tempPK)
-
-      log "Broadcasting transaction: #{txn.serialize()}"
-
-      @insight.broadcast txn
-
   makeClaim: ->
-    @insight.address claim.data.tempAddress(), (err, info)->
-      if err
-        console.error err
+    @insight.getUnspentUtxos @data.tempAddress(), (err, utxos)=>
+      if utxos.length == 0
+        log "No unspent transactions. You may need to fund this address: #{@data.tempAddress()}"
       else
-        log info
-        if info.unconfirmedBalance > 0
-          log 'Awaiting network confirmation for initial transaction.'
-        else if info.balance is 0
-          log "Please fund the initial address: #{claim.data.tempAddress()}"
-        else
-          log "Initial address has been funded.  Transferring it to cert destination address."
-          claim.transferToDestination()
+        total = utxos[0].satoshis
+        fee = 10000
+
+        # TODO: OP_RETURN
+        txn = new bitcore.Transaction()
+          .from utxos[0]
+          .to(@data.destinationAddress(), (total-fee))
+          .sign(@data.tempPK)
+
+        log "Broadcasting transaction: #{txn.serialize()}"
+        @insight.broadcast txn, (err, txnid)->
+          if err
+            console.error err
+          else
+            log "Transaction ID: #{txnid}"
+
 
 domainName = "www.mydomain.com"
 claim = new ClaimCert("tmp/certs/#{domainName}.json")
