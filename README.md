@@ -8,7 +8,7 @@ In 1995 I became involved with SSL (the S in HTTPS), which had been initially de
 
 Ultimately I became the co-author of the final specification and co-editor of the IETF TLS 1.0 standard, which is now the most widely adopted security standard in the world that is at the heart of the internet. Not only is it used for internet commerce, but also privacy: Google reports that it is now used for 50% of all incoming email and 60% of all outgoing email.
 
-I have not been active in the cryptographic security lately, instead I have been focused on software for mobile industry. However, every time there is an attack related against TLS reported I get a call asking about it. My recently, I combined my background in both fields to help establish standards for mobile phone security, privacy and transparency at Blackphone. There the topic of weaknesses in TLS have emerged again.
+I have not been active in the cryptographic security lately, instead I have been focused on software for mobile industry. However, every time there is an attack related against TLS reported I get a call asking about it. Recently, I combined my background in both fields to help establish standards for mobile phone security, privacy and transparency at Blackphone. There the topic of weaknesses in TLS have emerged again.
 
 TLS & Certificates
 ------------------
